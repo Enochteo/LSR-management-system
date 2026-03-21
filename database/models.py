@@ -2,9 +2,9 @@ from extensions import db
 
 
 class Student(db.Model):
+    """Represents each user from a regular student to an admin"""
     __tablename__ = "students"
 
-    # TODO: Add model columns and relationships.
     id = db.Column(db.Integer, primary_key=True)
     full_name = db.Column(db.String, nullable=False)
     email = db.Column(db.String, unique=True, index=True, nullable=False)
@@ -14,22 +14,10 @@ class Student(db.Model):
 
 
 class Room(db.Model):
-    """Represents a study room that can be signed into.
-
-    Suggested fields to implement:
-    - id: Integer primary key
-    - name: String, required
-    - capacity: Integer, optional
-    - room_code: String/UUID, unique; used in QR URLs
-    - qr_code_path: String, optional persisted image path
-
-    Suggested relationships:
-    - attendance_records: one-to-many AttendanceRecord
-    """
+    """Represents a study room that can be signed into."""
 
     __tablename__ = "rooms"
 
-    # TODO: Add model columns and relationships.
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String, nullable=False)
     capacity = db.Column(db.Integer)
@@ -40,27 +28,3 @@ class Room(db.Model):
 
 
 
-class AttendanceRecord(db.Model):
-    """Tracks sign-in/out sessions and enforcement flags.
-
-    Suggested fields to implement:
-    - id: Integer primary key
-    - student_id: FK -> students.id
-    - room_id: FK -> rooms.id
-    - sign_in_time: DateTime, required
-    - sign_out_time: DateTime, nullable
-    - status: Enum/String (ACTIVE, COMPLETED, EXPIRED)
-    - duration_minutes: Integer or computed property
-    - alert_30_sent: Boolean default False
-    - alert_10_sent: Boolean default False
-
-    Suggested constraints/indexes:
-    - Prevent >1 ACTIVE record per student
-    - sign_out_time > sign_in_time when present
-    - indexes on (student_id, status), (room_id, sign_in_time), sign_in_time
-    """
-
-    __tablename__ = "attendance_records"
-
-    # TODO: Add model columns, constraints, and helper properties.
-    pass
