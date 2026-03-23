@@ -33,24 +33,7 @@ class Room(db.Model):
 
 
 class AttendanceRecord(db.Model):
-    """Tracks sign-in/out sessions and enforcement flags.
-
-    Suggested fields to implement:
-    - id: Integer primary key
-    - student_id: FK -> students.id
-    - room_id: FK -> rooms.id
-    - sign_in_time: DateTime, required
-    - sign_out_time: DateTime, nullable
-    - status: Enum/String (ACTIVE, COMPLETED, EXPIRED)
-    - duration_minutes: Integer or computed property
-    - alert_30_sent: Boolean default False
-    - alert_10_sent: Boolean default False
-
-    Suggested constraints/indexes:
-    - Prevent >1 ACTIVE record per student
-    - sign_out_time > sign_in_time when present
-    - indexes on (student_id, status), (room_id, sign_in_time), sign_in_time
-    """
+    """Tracks sign-in/out sessions and enforcement flags."""
 
     __tablename__ = "attendance_records"
 
