@@ -1,11 +1,30 @@
 from flask import Flask
 
+from config import DevelopmentConfig
+from extensions import init_extensions, db
+from routes import register_blueprints
 
-app = Flask(__name__)
+def create_app(config_object=DevelopmentConfig):
+    """Create and configure the Flask application instance."""
+    app = Flask(__name__)
+    app.config.from_object(config_object)
+    # Initialize all extension objects (db, login manager, mail, etc.).
+    init_extensions(app)
 
-@app.route("/")
-def home():
-    return "<h1>Hello Library Enthusiast</>"
+    # Register all route blueprints (auth, attendance, admin, qr).
+    register_blueprints(app)
+    from database.models import Student, Room, AttendanceRecord
+    @app.get("/")
+    def home():
+        """Minimal health-like landing page for Phase 0 verification."""
+        return "Hello, world! Smart Digital Library scaffold is running."
 
-if __name__ == '__main__':
+    return app
+
+
+app = create_app()
+
+
+if __name__ == "__main__":
+    # Local-only run path; prefer `flask run` with FLASK_APP=app:create_app.
     app.run(debug=True)
