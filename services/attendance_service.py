@@ -12,12 +12,7 @@ class AttendanceService:
     """Service boundary for sign-in/sign-out/enforcement operations."""
 
     def resolve_or_create_student(self, name, email, student_id):
-        """Find existing student or create a new one.
-
-        TODO:
-        - Normalize/validate identifiers.
-        - Decide conflict strategy when email or student_id already exists.
-        """
+        """Find existing student or create a new one.        """
         name = (name or "").strip()
         email = (email or "").strip()
         student_id = (student_id or "").strip()
