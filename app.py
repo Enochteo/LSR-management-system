@@ -5,7 +5,13 @@ from extensions import init_extensions, db
 from routes import register_blueprints
 
 def create_app(config_object=DevelopmentConfig):
-    """Create and configure the Flask application instance."""
+    """Create and configure the Flask application instance.
+
+    TODO (Phase 0):
+    - Allow selecting config via environment variable.
+    - Add production-safe logging setup.
+    - Add error handler registration.
+    """
     app = Flask(__name__)
     app.config.from_object(config_object)
     # Initialize all extension objects (db, login manager, mail, etc.).
