@@ -84,11 +84,10 @@ class AttendanceService:
     def get_active_session_for_student(self, student_id):
         """Return ACTIVE attendance record if one exists."""
         # Normalize student identifier
-        student_id = (student_id or "").strip().lower()
-
-        # If nothing is provided
         if not student_id:
-            raise ValueError('Must provide student_id')
+            raise ValueError("Student ID not provided")
+        
+        student_id = int(student_id)
         
         # Query to find record with student_id and status filter
         records = db.session.execute(
@@ -101,4 +100,26 @@ class AttendanceService:
         # return most recent
         return records[0] if records else None
 
-    
+    def create_signin_session(self, student, room, now):
+        """Create and persist a new ACTIVE attendance session. """
+
+        # Validate student ID and room ID exist
+        if not student.id:
+            raise ValueError("Student ID not provided")
+        
+        if not room_id:
+            raise ValueError("Room ID not provided")
+        
+        student_id = int(student.id)
+        room_id = int(room.id)
+        # Create new Record Object
+        record = AttendanceRecord(student_id=student_id, room_id=room_id, status=Status.ACTIVE)
+
+        # Try adding to the table, check for integrity error
+        try:
+            db.session.add(record)
+            db.session.commit()
+        except IntegrityError:
+            db.session.rollback()
+            raise ValueError('Attendance record already exists')
+        return record
