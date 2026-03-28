@@ -43,8 +43,8 @@ class AttendanceService:
         # Check if a student object was found
         if student:
             # Update any missing fields
-            if not student.name:
-                student.name = name
+            if not student.full_name:
+                student.full_name = name
             if not student.email:
                 student.email = email
             if not student.student_id:
@@ -52,7 +52,7 @@ class AttendanceService:
             db.session.commit()
         else:  
             # Create new student object
-            student = Student(name=name, email=email, student_id=student_id)
+            student = Student(full_name=name, email=email, student_id=student_id)
             try:
                 db.session.add(student)
                 db.session.commit()
@@ -65,20 +65,23 @@ class AttendanceService:
         """Resolve and validate room from ID or room_code."""
 
         # Normalize room
-        room_identifier = (room_identifier or "").strip().lower()
+        if not room_identifier:
+            raise ValueError("Room ID not provided")
+        
+        room_id = int(room_identifier)
 
         if not room_identifier:
             raise ValueError("No room identifier provided")
         
-        room = db.session.execute(
+        rooms = db.session.execute(
             db.select(Room).where(
                 or_(Room.id == room_identifier, Room.room_code == room_identifier)
             )
         ).scalars().all()
 
-        if not room:
+        if not rooms:
             raise ValueError('Room not found')
-        return room
+        return rooms[0]
         
 
     def get_active_session_for_student(self, student_id):
@@ -107,7 +110,7 @@ class AttendanceService:
         if not student.id:
             raise ValueError("Student ID not provided")
         
-        if not room_id:
+        if not room.id:
             raise ValueError("Room ID not provided")
         
         student_id = int(student.id)
@@ -132,6 +135,8 @@ class AttendanceService:
         if end_time < attendance_record.sign_in_time:
             raise ValueError("Sign out time is earlier than the sign in time")
         
+        if status != Status.ACTIVE and status != Status.COMPLETED:
+            raise ValueError("Cannot sign out attendance record due to status")
         try:
             attendance_record.sign_out_time = end_time
             attendance_record.status = status
@@ -139,4 +144,12 @@ class AttendanceService:
         except IntegrityError:
             db.session.rollback()
             raise ValueError('Attendance record update error')
+        return attendance_record
         
+    def get_active_sessions(self):
+        """Return all ACTIVE sessions for dashboard and enforcement job."""
+        
+        records = db.session.execute(
+            db.select(AttendanceRecord).where(AttendanceRecord.status == Status.ACTIVE).order_by(db.desc(AttendanceRecord.sign_in_time))
+        ).scalars().all()
+        return records
