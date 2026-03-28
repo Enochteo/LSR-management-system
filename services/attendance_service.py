@@ -113,7 +113,7 @@ class AttendanceService:
         student_id = int(student.id)
         room_id = int(room.id)
         # Create new Record Object
-        record = AttendanceRecord(student_id=student_id, room_id=room_id, status=Status.ACTIVE)
+        record = AttendanceRecord(student_id=student_id, room_id=room_id, status=Status.ACTIVE, sign_in_time=now)
 
         # Try adding to the table, check for integrity error
         try:
@@ -123,3 +123,20 @@ class AttendanceService:
             db.session.rollback()
             raise ValueError('Attendance record already exists')
         return record
+    
+    def complete_session(self, attendance_record, end_time, status):
+        """Mark session as COMPLETED or EXPIRED and set sign-out timestamp."""
+        if not end_time:
+            raise ValueError("Value Error not provided")
+        
+        if end_time < attendance_record.sign_in_time:
+            raise ValueError("Sign out time is earlier than the sign in time")
+        
+        try:
+            attendance_record.sign_out_time = end_time
+            attendance_record.status = status
+            db.session.commit()
+        except IntegrityError:
+            db.session.rollback()
+            raise ValueError('Attendance record update error')
+        
