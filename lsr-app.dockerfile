@@ -9,10 +9,12 @@ WORKDIR /app
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     pkg-config \
+    python3-dev \
     libcairo2-dev \
     libpango1.0-dev \
     libgirepository1.0-dev \
     gir1.2-pango-1.0 \
+    libpq-dev \
     git \
     && rm -rf /var/lib/apt/lists/*
 
