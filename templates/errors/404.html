@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block title %}Page Not Found{% endblock %}
+{% block content %}
+<div class="empty-state" style="padding:5rem 1rem">
+  <i class="bi bi-search"></i>
+  <p style="font-size:1.5rem;font-weight:700;color:var(--c-text-heading)">Page Not Found</p>
+  <p class="text-muted">The page you're looking for doesn't exist.</p>
+  <a href="{{ url_for('attendance.signin_page') }}" class="btn btn-primary btn-sm mt-2">
+    Go Home
+  </a>
+</div>
+{% endblock %}

@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% block title %}Daily Log — {{ label_date }}{% endblock %}
+
+{% block content %}
+
+<div class="page-header">
+  <h2>Daily Log &mdash; {{ label_date }}</h2>
+  <div class="d-flex gap-2">
+    <a href="{{ url_for('admin.export_csv', date=selected_date) }}"
+       class="btn btn-sm btn-outline-secondary">
+      Export CSV
+    </a>
+    <a href="{{ url_for('admin.export_pdf', date=selected_date) }}"
+       class="btn btn-sm btn-outline-secondary">
+      Export PDF
+    </a>
+  </div>
+</div>
+
+<!-- Date filter -->
+<form method="GET" action="{{ url_for('admin.daily_log') }}"
+      class="d-flex align-items-end gap-2 mb-4">
+  <div>
+    <label for="date" class="form-label">Date</label>
+    <input type="date" class="form-control form-control-sm" id="date" name="date"
+           value="{{ selected_date }}" />
+  </div>
+  <button type="submit" class="btn btn-sm btn-primary">Filter</button>
+</form>
+
+<!-- Sessions table -->
+<div class="card">
+  <div class="card-header d-flex justify-content-between align-items-center">
+    <span>Sessions</span>
+    <span style="font-size:.78rem;color:var(--c-text-muted)">
+      {{ sessions | length }} record{{ 's' if sessions | length != 1 }}
+    </span>
+  </div>
+  {% if sessions %}
+    <div class="table-responsive">
+      <table class="table mb-0">
+        <thead>
+          <tr>
+            <th>Student</th>
+            <th>ID</th>
+            <th>Room</th>
+            <th>Sign-In</th>
+            <th>Sign-Out</th>
+            <th>Duration</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for s in sessions %}
+            <tr>
+              <td style="font-weight:500">{{ s.student_name }}</td>
+              <td class="font-mono text-muted">{{ s.student_id }}</td>
+              <td>{{ s.room_name }}</td>
+              <td class="text-muted">{{ s.sign_in_time }}</td>
+              <td class="text-muted">{{ s.sign_out_time or '—' }}</td>
+              <td class="text-muted">
+                {{ (s.duration | string + ' min') if s.duration else '—' }}
+              </td>
+              <td>
+                {% if s.status == 'ACTIVE' %}
+                  <span class="badge badge-active">Active</span>
+                {% elif s.status == 'COMPLETED' %}
+                  <span class="badge badge-info">Completed</span>
+                {% elif s.status == 'PENDING' %}
+                  <span class="badge badge-warning">Pending</span>
+                {% else %}
+                  <span class="badge badge-expired">Expired</span>
+                {% endif %}
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <div class="empty-state">
+      <i class="bi bi-calendar3"></i>
+      No sessions found for {{ label_date }}.
+    </div>
+  {% endif %}
+</div>
+
+{% endblock %}

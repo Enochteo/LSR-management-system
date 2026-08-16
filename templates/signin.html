@@ -1,0 +1,146 @@
+{% extends "base.html" %} {% block title %}{% if room %}Sign In — {{ room.name
+}}{% else %}Library Sign-In{% endif %}{% endblock %} {% block content %}
+<div class="signin-wrapper">
+  <div class="signin-card">
+    <!-- Room banner or generic header -->
+    <div class="room-banner">
+      {% if room %}
+      <p class="room-sub">You are signing in to</p>
+      <p class="room-name">{{ room.name }}</p>
+      {% else %}
+      <p class="room-name">Library Sign-In</p>
+      <p class="room-sub">Enter your details to begin a study session</p>
+      {% endif %}
+    </div>
+
+    <div
+      class="card border-0"
+      style="border-radius: 0 0 var(--radius) var(--radius)"
+    >
+      <div class="card-body" style="padding: 2rem">
+        <form
+          method="POST"
+          action="{{ url_for('attendance.signin_submit') }}"
+          novalidate
+          autocomplete="off"
+        >
+          {% if room or room_code %}
+          <input
+            type="hidden"
+            name="room_id"
+            value="{{ room.room_code if room else room_code }}"
+          />
+          {% endif %}
+
+          <div class="mb-3">
+            <label for="full_name" class="form-label">Full Name</label>
+            <input
+              type="text"
+              class="form-control"
+              id="full_name"
+              name="full_name"
+              placeholder="e.g. Jane Smith"
+              autocomplete="name"
+              autofocus
+              required
+            />
+          </div>
+
+          <div class="mb-3">
+            <label for="email" class="form-label">University Email</label>
+            <input
+              type="email"
+              class="form-control"
+              id="email"
+              name="email"
+              placeholder="jsmith@gsumail.gram.edu"
+              autocomplete="email"
+              required
+            />
+            <p class="form-text">Session alerts are sent to this address.</p>
+          </div>
+
+          <div class="mb-4">
+            <label for="student_id" class="form-label"
+              >Student ID (G-number)</label
+            >
+            <input
+              type="text"
+              class="form-control"
+              id="student_id"
+              name="student_id"
+              placeholder="G12345678"
+              autocomplete="off"
+              required
+            />
+          </div>
+
+          {% if not room and not room_code %}
+          <div class="mb-4">
+            <label for="room_id" class="form-label">Room Code</label>
+            <input
+              type="text"
+              class="form-control"
+              id="room_id"
+              name="room_id"
+              placeholder="e.g. ROOM-A"
+              autocomplete="off"
+              style="text-transform: uppercase"
+              required
+            />
+            <p class="form-text">
+              Found on the door or scan the QR code posted in the room.
+            </p>
+          </div>
+          {% endif %}
+
+          <button
+            type="submit"
+            class="btn btn-primary w-100 py-2"
+            style="font-size: 0.95rem; font-weight: 600"
+          >
+            Sign In
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Resume session -->
+    <div class="resume-card mt-3">
+      <p
+        class="mb-2"
+        style="
+          font-size: 0.8rem;
+          font-weight: 600;
+          color: var(--c-text-muted);
+          text-transform: uppercase;
+          letter-spacing: 0.05em;
+        "
+      >
+        Already signed in?
+      </p>
+      <form
+        method="POST"
+        action="{{ url_for('attendance.session_lookup') }}"
+        class="d-flex gap-2"
+        novalidate
+      >
+        <input
+          type="text"
+          class="form-control form-control-sm"
+          name="identifier"
+          placeholder="Enter your email or student ID"
+          required
+        />
+        <button
+          type="submit"
+          class="btn btn-sm btn-outline-secondary text-nowrap"
+          style="min-width: 140px"
+        >
+          Resume Session
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

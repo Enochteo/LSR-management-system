@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+{% block title %}Approval Queue{% endblock %}
+
+{% block content %}
+
+<div class="page-header d-flex align-items-center justify-content-between flex-wrap gap-2">
+  <div>
+    <h2 class="mb-0">Approval Queue</h2>
+    <p class="mb-0 mt-1" style="font-size:.83rem;color:var(--c-text-muted)">
+      Review pending room sign-ins and authorize groups of 2–6 students.
+    </p>
+  </div>
+  <span style="font-size:.8rem;color:var(--c-text-muted)">
+    {{ pending_groups | length }} room{{ 's' if pending_groups | length != 1 }} pending
+  </span>
+</div>
+
+{% if pending_groups %}
+
+  <div class="alert alert-info mb-4" role="alert" style="font-size:.85rem">
+    <i class="bi bi-info-circle me-1"></i>
+    Students must sign in as a group before gaining room access. Authorize once at least
+    <strong>2</strong> students are waiting (max 6). The room timer starts upon authorization.
+  </div>
+
+  <div class="row g-3">
+    {% for group in pending_groups %}
+      <div class="col-12 col-lg-6">
+        <div class="card border-start border-3 {% if group.can_authorize %}border-success{% else %}border-warning{% endif %}">
+
+          <!-- Card header: room name + waiting badge -->
+          <div class="card-header d-flex justify-content-between align-items-center">
+            <span style="font-weight:600;font-size:.95rem">
+              <i class="bi bi-door-open me-1" style="opacity:.7"></i>
+              {{ group.room_name }}
+            </span>
+            <span class="badge {% if group.can_authorize %}bg-success{% else %}bg-warning text-dark{% endif %}"
+                  style="font-size:.72rem">
+              {{ group.student_count }} / 6
+              {% if not group.can_authorize %}&nbsp;— need 1 more{% endif %}
+            </span>
+          </div>
+
+          <!-- Student list -->
+          <div class="card-body" style="padding:1rem 1.25rem">
+            <p style="font-size:.72rem;font-weight:600;text-transform:uppercase;
+                      letter-spacing:.06em;color:var(--c-text-muted);margin-bottom:.6rem">
+              Waiting since {{ group.waiting_since }}
+            </p>
+
+            <ul class="list-unstyled mb-0" style="font-size:.84rem">
+              {% for student in group.students %}
+                <li class="d-flex justify-content-between align-items-start py-1"
+                    style="border-bottom: 1px solid var(--c-border, rgba(255,255,255,.07))">
+                  <div>
+                    <span style="font-weight:600">{{ student.name }}</span>
+                    <span style="color:var(--c-text-muted);font-size:.78rem;margin-left:.4rem">
+                      {{ student.student_id }}
+                    </span>
+                    <div style="font-size:.76rem;color:var(--c-text-muted)">
+                      {{ student.email }}
+                    </div>
+                  </div>
+                  <span style="font-size:.75rem;color:var(--c-text-muted);white-space:nowrap;
+                               padding-left:.5rem;padding-top:.1rem">
+                    {{ student.requested_at }}
+                  </span>
+                </li>
+              {% endfor %}
+            </ul>
+
+            {% if not group.can_authorize %}
+              <div class="mt-2" style="font-size:.8rem;color:var(--c-warn)">
+                <i class="bi bi-exclamation-triangle me-1"></i>
+                At least 2 students required to authorize room access.
+              </div>
+            {% endif %}
+          </div>
+
+          <!-- Action buttons -->
+          <div class="card-footer d-flex gap-2">
+            <form method="POST"
+                  action="{{ url_for('admin.authorize_room', room_id=group.room_id) }}"
+                  style="flex:1">
+              <button type="submit"
+                      class="btn btn-sm btn-success w-100"
+                      {% if not group.can_authorize %}disabled title="Need at least 2 students"{% endif %}>
+                <i class="bi bi-check-circle me-1"></i>Authorize Access
+              </button>
+            </form>
+
+            <form method="POST"
+                  action="{{ url_for('admin.reject_room', room_id=group.room_id) }}"
+                  onsubmit="return confirm('Reject and remove all {{ group.student_count }} pending sign-in(s) for {{ group.room_name }}?')">
+              <button type="submit" class="btn btn-sm btn-outline-danger">
+                <i class="bi bi-x-circle me-1"></i>Reject
+              </button>
+            </form>
+          </div>
+
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+
+{% else %}
+  <div class="empty-state">
+    <i class="bi bi-shield-check"></i>
+    No sign-ins pending authorization.
+    <a href="{{ url_for('admin.dashboard') }}" class="d-block mt-2 small">
+      Back to Dashboard
+    </a>
+  </div>
+{% endif %}
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+  // Auto-refresh every 15 seconds so the queue stays live.
+  setTimeout(function () { location.reload(); }, 15000);
+</script>
+{% endblock %}

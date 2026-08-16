@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}Admin Login{% endblock %}
+
+{% block content %}
+<div class="signin-wrapper">
+  <div class="signin-card">
+
+    <div class="room-banner">
+      <p class="room-name">Admin Access</p>
+      <p class="room-sub">Smart Digital Library</p>
+    </div>
+
+    <div class="card border-0" style="border-radius:0 0 var(--radius) var(--radius)">
+      <div class="card-body" style="padding:2rem">
+        <form method="POST" action="{{ url_for('auth.login_post') }}" novalidate>
+          <div class="mb-3">
+            <label for="email" class="form-label">Email address</label>
+            <input type="email" class="form-control" id="email" name="email"
+                   autocomplete="email" autofocus required />
+          </div>
+          <div class="mb-4">
+            <label for="password" class="form-label">Password</label>
+            <input type="password" class="form-control" id="password" name="password"
+                   autocomplete="current-password" required />
+          </div>
+          <button type="submit"
+                  class="btn btn-primary w-100 py-2"
+                  style="font-size:.95rem;font-weight:600">
+            Sign In
+          </button>
+        </form>
+      </div>
+    </div>
+
+  </div>
+</div>
+{% endblock %}

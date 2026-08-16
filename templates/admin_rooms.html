@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+{% block title %}Rooms{% endblock %}
+
+{% block content %}
+
+<div class="page-header">
+  <h2>Study Rooms</h2>
+</div>
+
+<!-- Add room — superusers only -->
+{% if current_user.is_superuser %}
+<div class="card mb-4">
+  <div class="card-header">Add New Room</div>
+  <div class="card-body">
+    <form method="POST" action="{{ url_for('admin.create_room') }}"
+          class="row g-3 align-items-end">
+      <div class="col-md-4">
+        <label class="form-label">Room Name</label>
+        <input type="text" class="form-control" name="name"
+               placeholder="e.g. Study Room A" required />
+      </div>
+      <div class="col-md-3">
+        <label class="form-label">Room Code</label>
+        <input type="text" class="form-control" name="room_code"
+               placeholder="e.g. ROOM-A"
+               style="text-transform:uppercase" required />
+      </div>
+      <div class="col-md-2">
+        <label class="form-label">Capacity</label>
+        <input type="number" class="form-control" name="capacity"
+               value="6" min="1" max="50" required />
+      </div>
+      <div class="col-md-3">
+        <button type="submit" class="btn btn-primary w-100">Create Room</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endif %}
+
+<!-- Room list -->
+<div class="card">
+  <div class="card-header">All Rooms</div>
+  {% if rooms %}
+    <div class="table-responsive">
+      <table class="table mb-0">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Code</th>
+            <th>Capacity</th>
+            <th>Active Now</th>
+            <th>QR Code</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for room in rooms %}
+            <tr>
+              <td style="font-weight:500">{{ room.name }}</td>
+              <td class="font-mono">{{ room.room_code }}</td>
+              <td>{{ room.capacity }}</td>
+              <td>
+                {% if room.active_count >= room.capacity %}
+                  <span class="badge badge-expired">{{ room.active_count }}/{{ room.capacity }}</span>
+                {% elif room.active_count > 0 %}
+                  <span class="badge badge-warning">{{ room.active_count }}/{{ room.capacity }}</span>
+                {% else %}
+                  <span class="badge badge-active">0/{{ room.capacity }}</span>
+                {% endif %}
+              </td>
+              <td>
+                {% if room.qr_code_path %}
+                  <a href="{{ url_for('static', filename=room.qr_code_path) }}"
+                     target="_blank"
+                     style="font-size:.83rem">View QR</a>
+                {% else %}
+                  <span style="font-size:.83rem;color:var(--c-text-muted)">Not generated</span>
+                {% endif %}
+              </td>
+              <td class="d-flex gap-2 flex-wrap">
+                <a href="{{ url_for('qr.generate_room_qr', room_id=room.id) }}"
+                   class="btn btn-sm btn-outline-secondary"
+                   style="font-size:.775rem">
+                  {{ 'Regenerate QR' if room.qr_code_path else 'Generate QR' }}
+                </a>
+                {% if current_user.is_superuser %}
+                  <form method="POST"
+                        action="{{ url_for('admin.delete_room', room_id=room.id) }}"
+                        onsubmit="return confirm('Delete {{ room.name }}? This cannot be undone.')">
+                    <button type="submit"
+                            class="btn btn-sm btn-outline-danger"
+                            style="font-size:.775rem">
+                      Delete
+                    </button>
+                  </form>
+                {% endif %}
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <div class="empty-state">
+      <i class="bi bi-door-open"></i>
+      No rooms yet.{% if current_user.is_superuser %} Add one above.{% endif %}
+    </div>
+  {% endif %}
+</div>
+
+{% endblock %}
