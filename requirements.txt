@@ -125,8 +125,8 @@ pyglet==2.1.8
 pyglm==2.8.2
 Pygments==2.19.2
 PyJWT==2.10.1
-pyobjc-core==11.1
-pyobjc-framework-Cocoa==11.1
+pyobjc-core==11.1; sys_platform == "darwin"
+pyobjc-framework-Cocoa==11.1; sys_platform == "darwin"
 pyOpenSSL==25.1.0
 pyparsing==3.2.3
 PySocks==1.7.1
