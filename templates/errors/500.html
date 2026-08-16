@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block title %}Server Error{% endblock %}
+{% block content %}
+<div class="empty-state" style="padding:5rem 1rem">
+  <i class="bi bi-exclamation-circle"></i>
+  <p style="font-size:1.5rem;font-weight:700;color:var(--c-text-heading)">Server Error</p>
+  <p class="text-muted">Something went wrong. Please try again shortly.</p>
+  <a href="{{ url_for('attendance.signin_page') }}" class="btn btn-primary btn-sm mt-2">
+    Go Home
+  </a>
+</div>
+{% endblock %}
