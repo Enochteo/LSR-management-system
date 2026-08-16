@@ -38,6 +38,7 @@ def create_app(config_object=None):
     _register_user_loader()
     _register_cli_commands(app)
     _register_error_handlers(app)
+    _register_template_filters(app)
 
     return app
 
@@ -84,6 +85,38 @@ def _register_cli_commands(app):
 
         db.session.commit()
 
+    @app.cli.command("create-superuser")
+    @click.option("--name", prompt="Full name")
+    @click.option("--email", prompt="Email")
+    @click.option("--student-id", prompt="Student/staff ID", default="")
+    @click.option("--password", prompt=True, hide_input=True, confirmation_prompt=True)
+    def create_superuser(name, email, student_id, password):
+        """Create or promote a user to superuser (admin + exclusive room management)."""
+        from database.models import Student
+
+        student = db.session.execute(
+            db.select(Student).where(Student.email == email)
+        ).scalar_one_or_none()
+
+        if student:
+            student.is_admin = True
+            student.is_superuser = True
+            student.set_password(password)
+            click.echo(f"Promoted existing user '{email}' to superuser.")
+        else:
+            student = Student(
+                full_name=name,
+                email=email,
+                student_id=student_id or None,
+                is_admin=True,
+                is_superuser=True,
+            )
+            student.set_password(password)
+            db.session.add(student)
+            click.echo(f"Created superuser '{email}'.")
+
+        db.session.commit()
+
     @app.cli.command("run-enforcement")
     def run_enforcement():
         """Run one session enforcement pass (suitable for system cron)."""
@@ -116,6 +149,16 @@ def _register_cli_commands(app):
         click.echo(f"Seeded {added} room(s).")
 
 
+def _register_template_filters(app):
+    """Register custom Jinja2 filters."""
+    from utils import fmt_central
+
+    @app.template_filter("ct")
+    def central_time_filter(dt, fmt="%b %d, %Y %I:%M %p CT"):
+        """Convert a UTC-naive datetime to a Central Time string."""
+        return fmt_central(dt, fmt) or "—"
+
+
 def _register_error_handlers(app):
     """Register HTTP error page handlers."""
     from flask import render_template
@@ -137,4 +180,4 @@ def _register_error_handlers(app):
 app = create_app()
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(host='0.0.0.0', port=5000, debug=True)
