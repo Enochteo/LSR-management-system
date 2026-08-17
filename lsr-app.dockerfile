@@ -30,4 +30,7 @@ ENV FLASK_APP=app.py
 ENV FLASK_RUN_HOST=0.0.0.0
 EXPOSE 5000
 
+RUN flask db migrate -m "sync models to online db"
+RUN flask db upgrade
+
 CMD ["flask", "run"]
